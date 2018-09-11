@@ -1,0 +1,15 @@
+par(mar=c(3,3,3,3))
+# top_axis_phi <- c(-0.6,-0.4,-0.2,0,0.2,0.4,0.6)
+plot(t,u,col="blue", xlab="",ylab="",pch=16) # log odds
+points(t,y, col="red", pch=17) # power for Phi
+
+usr <- par("usr")
+par(usr=c(min(x),max(x),usr[1:2]))
+
+axis(3,col.ticks="red",col.axis="red")
+
+mtext("Log odds ratio",1,line=2,at=0,col="blue")
+mtext("Phi",3,line=2,at=0,col="red")
+ 
+mtext("Power (Wald)",2,line=2,at=0)
+legend("bottomright", title="Power (Wald)",c("Log odds","Phi"),fill=c("blue","red"), horiz=TRUE)
