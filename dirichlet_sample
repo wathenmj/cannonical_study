@@ -1,0 +1,77 @@
+# dirichlet_sample
+library(gtools)
+# x comes from one row of clean dirichlet
+dirichlet_sample <-function(n,n.size,x){
+  data1= data.frame()
+  count_lnOR_Wald <- rep(0,n)
+  count_lnOR_Rao <- rep(0,n)
+  count_Phi_Wald<-rep(0,n)
+  count_Phi_Rao  <- rep(0,n)
+
+  for(i in 1:n){
+
+    Sample<-rmultinom(n, n.size, prob= c(x[1,1], x[1,2], x[1,3], x[1,4]))
+
+    a <- Sample[1,1]/n.size
+    b <- Sample[2,1]/n.size
+    c <- Sample[3,1]/n.size
+    d <- Sample[4,1]/n.size
+
+    # Odds Ratio ####
+
+    OddsRatio <- a*(1-a-b-c)/(b*c)
+    lnOR <- log(OddsRatio)
+    AsyVarOR <- (1/a + 1/b + 1/c + 1/(1 - a - b - c))
+    # Variance under Null for Odds ratio
+    Var_OR_Null <-
+      (1 / ((a + b) * (a + c)) + 1 / ((a + b) * (b + d)) + 1 / ((a +c) * (c + d)) + 1 / ((b + d) * (c + d)))
+
+    # Pearson Phi ####
+
+    G <- (a+b)*(a+c)*(c+d)*(b+d)
+    Phi <- (a*d - b*c)*G^(-0.5)
+    DerA <- d*G^(-0.5) - (0.5)*(Phi/G)*(c+d)*(b+d)*(2*a + b + c)
+    DerD <- a*G^(-0.5) - (0.5)*(Phi/G)*(a+b)*(a+c)*(2*d + b + c)
+    DerB <- -c*G^(-0.5) - (0.5)*(Phi/G)*(a+c)*(c+d)*(2*b + a + d)
+    DerC <- -b*G^(-0.5) - (0.5)*(Phi/G)*(a+b)*(b+d)*(2*c + a + d)
+    varA <- a*(1-a)
+    varB <- b*(1-b)
+    varC <- c*(1-c)
+    varD <- d*(1-d)
+    covAB <- -a*b
+    covAC <- -a*c
+    covAD <- -a*d
+    covBC <- -b*c
+    covBD <- -b*d
+    covCD <- -c*d
+    AsyVarPhi <- (varA*(DerA)^2 + varB*(DerB)^2 + varC*(DerC)^2 +
+                    varD*(DerD)^2 + 2*covAB*DerA*DerB + 2*covAC*DerA*DerC +
+                    2*covAD*DerA*DerD + 2*covBC*DerB*DerC + 2*covBD*DerB*DerD +
+                    2*covCD*DerC*DerD)
+    # count Wald ####
+    z_lnOR_Wald <- lnOR/sqrt(AsyVarOR/100)
+    count_lnOR_Wald <- ifelse(abs(z_lnOR_Wald)>1.96,1,0)
+    z_Phi_Wald <- Phi/sqrt(AsyVarPhi/100)
+    count_Phi_Wald<-ifelse(abs(z_Phi_Wald)>1.96,1,0)
+
+    # count Rao ####
+    AsyVarLnOdds_Dir <- x$AsyVarOR
+    z_lnOR_Rao <- lnOR / sqrt(AsyVarLnOdds_Dir)
+    count_lnOR_Rao <- ifelse(abs(z_lnOR_Rao) > 1.96, 1, 0)
+    AsyVarPhi_Dir <- x$AsyVarPhi
+    z_Rao_Phi <- Phi/sqrt(AsyVarPhi_Dir)
+    count_Phi_Rao <- ifelse(abs(z_Rao_Phi) > 1.96, 1, 0)
+
+    #######
+    df <- c(count_lnOR_Wald,count_lnOR_Rao,count_Phi_Wald,count_Phi_Rao)
+    data1=rbind(data1,df)
+
+  }# for loop
+
+  return(data1)
+  colnames(data1)<-c("count_lnOR_Wald","count_lnOR_Rao","count_Phi_Wald","count_Phi_Rao")
+}
+
+Y<-dirichlet_sample(100,100,x)
+colnames(Y)<-c("count_lnOR_Wald","count_lnOR_Rao","count_Phi_Wald","count_Phi_Rao")
+head(Y)
