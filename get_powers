@@ -1,0 +1,45 @@
+# get_powers
+clean_dirclt <- clean_dirclt[1:100,]
+clean_dirclt$pwr_Wald_LnOdds <- rep(0,nrow(clean_dirclt))
+clean_dirclt$pwr__Wald_Phi <- rep(0,nrow(clean_dirclt))
+clean_dirclt$pwr_Rao_LnOdds <- rep(0,nrow(clean_dirclt))
+clean_dirclt$pwr__Rao_Phi <- rep(0,nrow(clean_dirclt))
+
+for(i in 1:100){
+  x <- clean_dirclt[i,c(1:9)]
+  Y <- dirichlet_sample(100,100,x)
+colnames(Y)<-c("count_lnOR_Wald","count_lnOR_Rao","count_Phi_Wald","count_Phi_Rao")
+clean_dirclt$pwr_Wald_LnOdds[i] <- sum(Y$count_lnOR_Wald,na.rm = TRUE)
+clean_dirclt$pwr_Rao_LnOdds[i] <- sum(Y$count_lnOR_Rao,na.rm = TRUE)
+clean_dirclt$pwr__Wald_Phi[i] <- sum(Y$count_Phi_Wald,na.rm = TRUE)
+clean_dirclt$pwr__Rao_Phi[i] <- sum(Y$count_Phi_Rao,na.rm = TRUE)
+}
+
+
+
+count_lnOR_Wald
+count_lnOR_Rao
+count_Phi_Wald
+count_Phi_Rao
+
+
+
+par(mfrow=c(1,1))
+
+w <- clean_dirclt$Ln_Odds_Ratio
+y <- clean_dirclt$pwr_Wald_LnOdds
+z <- clean_dirclt$pwr_Rao_LnOdds
+plot(w,y,title("Power log odds ratio Wald"))
+plot(w,z,title("Log Odds Ratio Power Rao"))
+
+
+
+
+
+t <- clean_dirclt$Phi
+u <- clean_dirclt$pwr__Wald_Phi
+v <- clean_dirclt$pwr__Rao_Phi
+plot(t,u,title("Phi Power Wald"))
+plot(t,v,title("Phi Power Rao"))
+
+save.image("powers")
