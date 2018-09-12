@@ -1,0 +1,78 @@
+# get_dirchelet
+library(gtools)
+df = data.frame(matrix(vector(), 0, 4,
+                       dimnames=list(c(), c("A", "B", "C","D"))),
+                stringsAsFactors=F)
+for(i in 1:204){
+  x<- rdirichlet(1,c(1,1,1,1))
+  if (x[1]<=0.05 | x[2]<=0.05 | x[3]<=0.05 |x[4]<=0.05){
+    next
+  }
+  df[i,] <- x
+
+}
+clean_dirclt <- na.omit(df)
+summary(clean_dirclt[,1])
+hist(clean_dirclt[,1])
+head(clean_dirclt)
+clean_dirclt$Ln_Odds_Ratio <- log((clean_dirclt[,1]*clean_dirclt[,4])/(clean_dirclt[,2]*clean_dirclt[,3]))
+
+# need one more column for Pop Asmptotic Variance of Phi and Pop Asymptotic Variace for LnOdds ratio
+
+A <- clean_dirclt$A; B <- clean_dirclt$B; C <- clean_dirclt$C; D <- clean_dirclt$D
+
+
+
+
+var_A <- A * (1 - A)
+var_B <- B * (1 - B)
+var_C <- C * (1 - C)
+var_D <- D * (1 - D)
+
+cov_AB <- -A * B
+cov_AC <- -A * C
+cov_AD <- -A * D
+cov_BC <- -B * C
+cov_BD <- -B * D
+cov_CD <- -C * D
+
+
+row_1 <- A + B
+row_2 <- C + D
+col_1 <- A + C
+col_2 <- B + D
+
+pop_phi <- ((A * D) - (B * C)) / sqrt(row_1 * row_2 * col_1 * col_2)
+
+G <- (A + B) * (C + D) * (A + C) * (B + D)
+DphiA <- D * G ^ (-0.5) - 0.5 * pop_phi * G ^ (-1) * (C + D) * (B + D) *
+  (2 * A + B + C)
+DphiD <- A * G ^ (-0.5) - 0.5 * pop_phi * G ^ (-1) * (A + B) * (A + C) *
+  (2 * D + B + C)
+DphiB <- -C * G ^ (-0.5) - 0.5 * pop_phi * G ^ (-1) * (A + C) * (C + D) *
+  (2 * B + A + D)
+DphiC <- -B * G ^ (-0.5) - 0.5 * pop_phi * G ^ (-1) * (A + B) * (B + D) *
+  (2 * C + A + D)
+
+clean_dirclt$AsyVarPhi <-
+  (
+    var_A * DphiA ^ 2 + var_B * DphiB ^ 2 + var_C * DphiC ^ 2 + var_D * DphiD ^
+      2 +
+      2 * cov_AB * DphiA * DphiB + 2 * cov_AC * DphiA *
+      DphiC + 2 * cov_AD * DphiA * DphiD +
+      2 * cov_BC * DphiB * DphiC + 2 * cov_BD * DphiB *
+      DphiD + 2 * cov_CD * DphiC * DphiD
+  ) /100
+
+
+clean_dirclt$AsyVarOR <- (1 / clean_dirclt$A + 1 / clean_dirclt$B + 1 / clean_dirclt$C + 1 / (1 - clean_dirclt$A - clean_dirclt$B - clean_dirclt$C))/100
+clean_dirclt$G <- (clean_dirclt[,1]+clean_dirclt[,2])*(clean_dirclt[,1]+clean_dirclt[,3])*(clean_dirclt[,3]+clean_dirclt[,4])*(clean_dirclt[,2]+ clean_dirclt[,4])
+clean_dirclt$Phi <- (clean_dirclt[,1]*clean_dirclt[,4] - clean_dirclt[,2]*clean_dirclt[,3])*G^(-0.5)
+
+
+
+
+
+
+write.csv(clean_dirclt, "clean_dirclt_100",quote = FALSE, col.names = TRUE,row.names = FALSE)
+names(clean_dirclt)
