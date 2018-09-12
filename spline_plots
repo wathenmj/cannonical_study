@@ -1,0 +1,71 @@
+# spline_plots
+setwd("~/")
+
+library(splines)
+library(dplyr)
+# save.image("models")
+# y <- clean_dirclt$pwr_Wald_LnOdds
+yy <- y
+# w <- clean_dirclt$Ln_Odds_Ratio
+xx <- w
+
+data<- as.data.frame(cbind(xx,yy))
+
+
+# df = number of knots
+model <- lm(data$yy~bs(data$xx,degree = 1, df =12))
+summary(model)
+model_1 <- lm(data$yy~bs(data$xx,degree =1, df =10))
+
+model_2 <- lm(data$yy~bs(data$xx,degree = 1, df =8))
+summary(model_2)
+# Splines3 <- lm(data$yy~bs(data$xx,degree = 3,df =4))
+# dev.off()
+plot(xx,yy)
+#lines(xx,predict(model),col='red')
+points(xx,fitted(model_1), col="blue")
+points(xx,fitted(model_2), col="magenta")
+
+anova(model_1, model_2)
+
+lines(sort(xx),fitted(model_1)[order(xx)],col="red")
+lines(sort(xx),fitted(model_2)[order(xx)],col="black")
+
+
+
+model_4 <- lm(data$yy~bs(data$xx,degree = 3, df =10))
+plot(xx,yy)
+points(xx,fitted(model_4), col="blue")
+lines(sort(xx),fitted(model_4)[order(xx)],col="red")
+
+
+model_5 <- lm(data$yy~bs(data$xx,degree = 3, df =8))
+plot(xx,yy)
+points(xx,fitted(model_5), col="blue")
+lines(sort(xx),fitted(model_5)[order(xx)],col="red")
+
+
+
+model_6 <- lm(data$yy~bs(data$xx,degree = 3, df =6))
+plot(xx,yy)
+points(xx,fitted(model_6), col="blue")
+lines(sort(xx),fitted(model_6)[order(xx)],col="red")
+
+
+model_7 <- lm(data$yy~bs(data$xx,degree = 3, df =7))
+plot(xx,yy)
+points(xx,fitted(model_7), col="blue")
+lines(sort(xx),fitted(model_7)[order(xx)],col="red")
+
+model_8 <- lm(data$yy~bs(data$xx,degree = 5, df =7))
+plot(xx,yy)
+points(xx,fitted(model_8), col="blue")
+lines(sort(xx),fitted(model_8)[order(xx)],col="red")
+
+
+model_9 <- lm(data$yy~bs(data$xx,degree = 4, df =7))
+plot(xx,yy)
+points(xx,fitted(model_9), col="blue")
+lines(sort(xx),fitted(model_9)[order(xx)],col="red")
+abline(a=5, b=0)
+
