@@ -1,0 +1,34 @@
+# correlation_plots
+library(psych)
+library(caret)
+w <- read.delim("clipboard")
+
+powers <- w[,10:13]
+
+dmy <- dummyVars("~.", data = powers)
+powers <- data.frame(predict(dmy, newdata = powers))
+
+pairs(powers,cex.labels = 0.75)
+
+cor.prob <- function(X, dfr = nrow(X) - 2){
+  R <- cor(X, method = "pearson", use = "pairwise.complete.obs")
+  above <- row(R) < col(R)
+  r2 <- R[above]^2
+  Fstat <- r2 * dfr/(1 - r2)
+  R[above] <- 1 - pf(Fstat, 1, dfr)
+  R[row(R) == col(R)] <- NA
+  round(R, 4)
+}
+
+flattenSquareMatrix <- function(m){
+  if((class(m) != "matrix") | (nrow(m) != ncol(m))) stop("must be a square matrix.")
+  if(!identical(rownames(m), colnames(m))) stop("Row and column names must be equal")
+  ut <- upper.tri(m)
+  data.frame(i = rownames(m)[row(m)[ut]],
+             j = rownames(m)[col(m)[ut]],
+             cor=t(m)[ut],
+             p=m[ut])
+}
+ corMasterList <- flattenSquareMatrix(cor.prob(powers))
+ 
+pairs.panels(powers, cex.labels = 1, cex.cor = 0.35, lm=T, digits = 4, ellipses = T)
