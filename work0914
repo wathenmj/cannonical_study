@@ -1,0 +1,34 @@
+library(splines)
+par(mar=c(3,3,3,3))
+# top_axis_phi <- c(-0.6,-0.4,-0.2,0,0.2,0.4,0.6)
+plot(t,u,col="blue", xlab="",ylab="",pch=16) # log odds
+points(t,y, col="red", pch=17) # power for Phi
+model_lnOdds_W7 <- lm(u~bs(t,degree = 5, df =7))
+lines(sort(t),fitted(model_lnOdds_W7)[order(t)],col="blue")
+
+model_Phi_W7 <- lm(y~bs(x,degree = 5, df =7))
+lines(sort(t),fitted(model_Phi_W7)[order(t)],col="red")
+
+usr <- par("usr")
+par(usr=c(min(x),max(x),usr[1:2]))
+
+axis(3,col.ticks="red",col.axis="red")
+
+mtext("Log odds ratio",1,line=2,at=0,col="blue")
+mtext("Phi",3,line=2,at=0,col="red")
+ 
+mtext("Power (Wald)",2,line=2,at=0)
+legend("bottomright", title="Power (Wald)",c("Log odds","Phi"),fill=c("blue","red"), horiz=TRUE)
+ 
+plot(t,y)
+model_Phi_W9 <- lm(y~bs(x,degree = 8, df =9))
+lines(sort(t),fitted(model_Phi_W9)[order(t)],col="red")
+points(t,fitted(model_Phi_W9), col="red")
+summary(model_Phi_W9)
+
+plot(t,u)
+model_lnOdds_W9 <- lm(u~bs(t,degree = 8, df =9))
+points(t,fitted(model_lnOdds_W9), col="blue")
+lines(sort(t),fitted(model_lnOdds_W9)[order(t)],col="blue")
+
+lines(sort(x),fitted(model_Phi_W9)[order(x)],col="red")
